@@ -57,13 +57,19 @@
   when: (alertmanager == true and alert_rules_config != "")
 
 - name: Copy Own Blackbox config
-  template:
+  copy:
     src: '{{ blackbox_config }}'
     dest: /monitoring/blackbox/blackbox.yml
+    owner: root
+    group: root
+    mode: '0644'
   when: (blackbox == true and blackbox_config != "")
 
 - name: Copy Own Alertmanager Template
-  template:
+  copy:
     src: '{{ blackbox_config }}'
     dest: /monitoring/alertmanager/template.tmpl
+    owner: root
+    group: root
+    mode: '0644'
   when: (alertmanager == true and alertmanager_message_template != "")
