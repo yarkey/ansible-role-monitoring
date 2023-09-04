@@ -1,0 +1,56 @@
+{% if prometheus == true %}
+
+scrape_configs:
+{% if prometheus_node_exporter_group is not none %}
+  - job_name: node_exporter
+    scrape_interval: 15s
+    static_configs:
+    - targets:
+{% for server in prometheus_node_exporter_group  %}
+      - {{ server }}:9100
+{% endfor %}
+{% endif %}
+
+{% if prometheus_win_exporter_group is not none %}
+  - job_name: win_exporter
+    scrape_interval: 15s
+    static_configs:
+    - targets:
+{% for win_server in prometheus_win_exporter_group %}
+      - {{ win_server }}:9182
+{% endfor %}
+{% endif %}
+
+{% if prometheus_blackbox_group is not none %}
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+{% for site in prometheus_blackbox_group %}
+        - {{ site }}
+{% endfor %}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+{% endif %}
+
+{% if alertmanager == true %}
+rule_files:
+  - 'alert.rules'
+
+alerting:
+  alertmanagers:
+  - scheme: http
+    static_configs:
+    - targets:
+      - "alertmanager:9093"
+{% endif %}
+
+
+{% endif %}

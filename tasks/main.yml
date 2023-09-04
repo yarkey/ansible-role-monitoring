@@ -1,0 +1,21 @@
+---
+# tasks file for observer
+
+# os sensitive tasks
+- import_tasks: ubnt-docker-install.yaml
+#  when: ansible_distribution == "Ubuntu"
+- import_tasks: cent-docker-install.yaml
+#  when: ansible_distribution == "CentOS"
+
+# create working dirs
+- import_tasks: dirs.yaml
+
+# import configs
+- import_tasks: configs.yaml
+
+# run containers
+- import_tasks: containers.yaml
+
+
+
+

@@ -1,0 +1,52 @@
+---
+- name: Create Main Dir
+  file:
+    path: /monitoring
+    state: directory
+    mode: '0755'
+
+- name: Create Prometheus Folder
+  file:
+    path: /monitoring/prometheus
+    state: directory
+    mode: '0755'
+  when:
+    - prometheus == True
+
+- name: Create Grafana Folder
+  file:
+    path: /monitoring/grafana
+    state: directory
+    mode: '0755'
+  when:
+    - grafana == True
+
+- name: Create Grafana Volume
+  docker_volume:
+    name: grafana
+  when:
+    - grafana == True
+
+- name: Create Alertmanager Folder
+  file:
+    path: /monitoring/alertmanager/data
+    state: directory
+    mode: '0755'
+  when:
+    - alertmanager == True
+
+- name: Create Alertmanager-Bot Folder
+  file:
+    path: /monitoring/alertmanager-bot
+    state: directory
+    mode: '0755'
+  when:
+    - alertmanagerbot == True
+
+- name: Create Blackbox Folder
+  file:
+    path: /monitoring/blackbox
+    state: directory
+    mode: '0755'
+  when:
+    - blackbox == True

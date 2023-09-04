@@ -1,0 +1,30 @@
+{% if alertmanager == true %}
+groups:
+{% raw %}
+- name: test
+  rules:
+  - alert: 'Потеря Связи с Сервером'
+    expr: up == 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      title: "Потеряна связь с сервером {{ $labels.instance }}!"
+      description: "Потерял связь с сервером {{ $labels.instance }}, просьба проверить доступность."
+{% endraw %}
+
+{% if blackbox == true %}
+{% raw %}
+- name: ssl-expiry-rule
+  rules:
+  - alert: SSLCertExpiringSoon
+    expr: probe_ssl_earliest_cert_expiry{job="blackbox"} - time() < 86400 * 140
+    for: 2m
+    labels:
+      severity: "warning"
+    annotations:
+      description: SSL для сайта {{ $labels.instance }} перестанет работать через {{ .Value | humanizeDuration }}. Просьба продлить действие сертификата.
+{% endraw %}
+{% endif %}      
+
+{% endif %}

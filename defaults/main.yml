@@ -1,0 +1,26 @@
+---
+# Highly recomended to specify this variables with host_vars
+tz: "Europe/Moscow"
+
+# What services should we deploy
+nodeexporter: False
+prometheus: False
+grafana: False
+alertmanager: False
+alertmanager-bot: False
+blackbox: False
+
+# Specify own configs if we dont want to use jinja templates
+prometheus_config: ""
+alertmanager_config: ""
+alert_config: ""
+blackbox_config: ""
+alertmanager_message_template: ""
+
+# Jinja Template Preferences
+prometheus_node_exporter_group: ""
+prometheus_win_exporter_group: ""
+prometheus_blackbox_group: ""
+
+alertmanager_tg_admin: ""
+alertmanager_tg_token: ""

@@ -1,0 +1,69 @@
+---
+- name: Place prometheus config from Jinja
+  template:
+    src: prometheus.yml.j2
+    dest: /monitoring/prometheus/prometheus.yml
+  when: (prometheus == true and prometheus_config == "")
+
+- name: Place alertmanager config from Jinja
+  template:
+    src: alertmanager.yml.j2
+    dest: /monitoring/alertmanager/config.yml
+  when: (alertmanager == true and alertmanager_config == "")
+
+- name: Place alert rules config from Jinja
+  template:
+    src: alert.rules.j2
+    dest: /monitoring/prometheus/alert.rules
+  when: (alertmanager == true and alert_rules_config == "")
+
+- name: Place Blackbox config from Jinja
+  template:
+    src: blackbox.yml.j2
+    dest: /monitoring/blackbox/blackbox.yml
+  when: (blackbox == true and blackbox_config == "")
+
+- name: Place Alertmanager Telegram Reciever Template from Jinja
+  template:
+    src: telegram.tmpl.j2
+    dest: /monitoring/alertmanager/template.tmpl
+  when: (alertmanager == true and alertmanager_message_template == "")
+
+- name: Copy Own Prometheus Config
+  copy:
+    src: '{{ prometheus_config }}'
+    dest: /monitoring/prometheus
+    owner: root
+    group: root
+    mode: '0644'
+  when: (prometheus == true and prometheus_config != "")
+
+- name: Copy Own Alertmanager Config
+  copy:
+    src: '{{ alertmanager_config }}'
+    dest: /monitoring/alertmanager
+    owner: root
+    group: root
+    mode: '0644'
+  when: (alertmanager == true and alertmanager_config != "")
+
+- name: Copy Own Alert Rules Config
+  copy:
+    src: '{{ alert_rules_config }}'
+    dest: /monitoring/prometheus
+    owner: root
+    group: root
+    mode: '0644'
+  when: (alertmanager == true and alert_rules_config != "")
+
+- name: Copy Own Blackbox config
+  template:
+    src: '{{ blackbox_config }}'
+    dest: /monitoring/blackbox/blackbox.yml
+  when: (blackbox == true and blackbox_config != "")
+
+- name: Copy Own Alertmanager Template
+  template:
+    src: '{{ blackbox_config }}'
+    dest: /monitoring/alertmanager/template.tmpl
+  when: (alertmanager == true and alertmanager_message_template != "")

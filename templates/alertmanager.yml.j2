@@ -1,0 +1,19 @@
+{% if alertmanager == true %}
+
+templates:
+  - '/etc/alertmanager/*.tmpl'
+
+route:
+    receiver: tg
+    repeat_interval: 2m
+
+receivers: 
+- name: 'tg'
+  telegram_configs:
+  - bot_token: '{{ alertmanager_tg_token }}'
+    api_url: https://api.telegram.org
+    chat_id: {{ alertmanager_tg_channel }}
+    parse_mode: 'HTML'
+    message: {% raw %}'{{ template "telegram.default" . }}'{% endraw %}
+
+{% endif %}

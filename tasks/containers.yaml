@@ -1,0 +1,108 @@
+---
+- name: Create Network
+  docker_network:
+    name: "apps_network"
+    ipam_config:
+      - subnet: "172.16.98.0/24"
+
+- name: Build and Run Prometheus
+  docker_container:
+    name: "prometheus"
+    recreate: True
+    restart_policy: always
+    env:
+      TZ: "Europe/Moscow"
+    image: "prom/prometheus:latest"
+    published_ports:
+      - 9090:9090
+    volumes:
+      - "/monitoring/prometheus/:/etc/prometheus/"
+    networks:
+      - name: "apps_network"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+  when:
+    - prometheus == True
+
+- name: Build and Run Grafana
+  docker_container:
+    name: "grafana"
+    recreate: True
+    restart_policy: unless-stopped
+    env:
+      TZ: "Europe/Moscow"
+    image: "grafana/grafana"
+    published_ports:
+      - 3000:3000
+    volumes:
+      - grafana:/var/lib/grafana
+    networks:
+      - name: "apps_network"
+  when:
+    - grafana == True
+
+- name: Node Exporter
+  docker_container:
+    name: "node-exporter"
+    hostname: "node-exporter"
+    recreate: True
+    restart_policy: unless-stopped
+    env:
+      TZ: "Europe/Moscow"
+    image: "prom/node-exporter"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --collector.filesystem.ignored-mount-points
+      - ^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)
+    published_ports:
+      - 9100:9100
+    networks:
+      - name: "apps_network"
+  when:
+    - nodeexporter == True
+
+- name: AlertManager
+  docker_container:
+    name: "alertmanager"
+    hostname: "alertmanager"
+    recreate: True
+    restart_policy: unless-stopped
+    env:
+      TZ: "Europe/Moscow"
+    image: "prom/alertmanager:latest"
+    volumes:
+      - /monitoring/alertmanager/:/etc/alertmanager/
+    command:
+      - --config.file=/etc/alertmanager/config.yml
+      - --storage.path=/etc/alertmanager/data
+    published_ports:
+      - 9093:9093
+    networks:
+      - name: "apps_network"
+  when:
+    - alertmanager == True
+
+- name: Blackbox
+  docker_container:
+    name: "blackbox"
+    hostname: "blackbox"
+    recreate: True
+    restart_policy: unless-stopped
+    env:
+      TZ: "{{ tz }}"
+    image: prom/blackbox-exporter
+    volumes:
+      - /monitoring/blackbox:/etc/blackbox
+    command:
+      - "--config.file=/etc/blackbox/blackbox.yml"
+    published_ports:
+      - 9115:9115
+    networks:
+      - name: "apps_network"
+  when:
+    - blackbox == True
